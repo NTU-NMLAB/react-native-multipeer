@@ -118,6 +118,10 @@ AppRegistry.registerComponent('peerApp', () => peerApp);
 
 Allow discovery of yourself as a peer in a given channel. `channelId` can be any string. `info` is an object containing data which will be passed to other peers when you join the channel.
 
+#### `hide(channelID)`
+
+The cancellation of `advertise`. Deny discovery of yourself as a peer in a given channel. `channelID` must be the name of channel you have joined.
+
 #### `browse(channelId)`
 
 Browse for peers on a given channel.
