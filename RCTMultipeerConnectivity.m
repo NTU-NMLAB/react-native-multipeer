@@ -1,6 +1,6 @@
 #import "RCTMultipeerConnectivity.h"
-#import <React/RCTBridge.h>
-#import <React/RCTEventDispatcher.h>
+#import "RCTBridge.h"
+#import "RCTEventDispatcher.h"
 //#import "ObjectStore.h"
 
 @implementation RCTMultipeerConnectivity
