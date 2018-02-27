@@ -6,6 +6,7 @@ class MultipeerConnection extends EventEmitter {
   constructor() {
     super();
     this.RCTMultipeerConnectivity = NativeModules.MultipeerConnectivity;
+    this.selfName = `User-${Math.round(1e6 * Math.random())}`;
     this.peers = {};
     this.connectedPeers = {};
 
@@ -93,6 +94,10 @@ class MultipeerConnection extends EventEmitter {
     );
   }
 
+  getSelfName() {
+    return this.selfName;
+  }
+
   getAllPeers() {
     return this.peers;
   }
@@ -125,7 +130,7 @@ class MultipeerConnection extends EventEmitter {
   }
 
   advertise(channel, info) {
-    this.RCTMultipeerConnectivity.advertise(channel, info);
+    this.RCTMultipeerConnectivity.advertise(channel, { ...info, name: this.selfName });
   }
 
   hide(channel) {
