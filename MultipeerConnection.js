@@ -1,84 +1,92 @@
-import React, { DeviceEventEmitter, NativeModules } from 'react-native';
+import { DeviceEventEmitter, NativeModules } from 'react-native';
 import { EventEmitter } from 'events';
 import Peer from './Peer';
-let RCTMultipeerConnectivity = NativeModules.MultipeerConnectivity;
+
+const RCTMultipeerConnectivity = NativeModules.MultipeerConnectivity;
 
 export default class MultipeerConnection extends EventEmitter {
-  
   constructor() {
     super();
-    this._peers = {};
-    this._connectedPeers = {};
-    var peerFound = DeviceEventEmitter.addListener(
+    this.peers = {};
+    this.connectedPeers = {};
+    const peerFound = DeviceEventEmitter.addListener(
       'RCTMultipeerConnectivityPeerFound',
       ((event) => {
-        var peer = new Peer(event.peer.id, event.peer.info.name);
-        this._peers[peer.id] = peer;
+        const peer = new Peer(event.peer.id, event.peer.info.name);
+        this.peers[peer.id] = peer;
         this.emit('peerFound', { peer });
-      }).bind(this));
-      
-    var peerLost = DeviceEventEmitter.addListener(
+      }),
+    );
+
+    const peerLost = DeviceEventEmitter.addListener(
       'RCTMultipeerConnectivityPeerLost',
       ((event) => {
-        var peer = this._peers[event.peer.id];
+        const peer = this.peers[event.peer.id];
         peer.emit('lost');
         this.emit('peerLost', { peer: { id: peer.id } });
-        delete this._peers[event.peer.id];
-        delete this._connectedPeers[event.peer.id];
-      }).bind(this));
-    
-    var peerConnected = DeviceEventEmitter.addListener(
+        delete this.peers[event.peer.id];
+        delete this.connectedPeers[event.peer.id];
+      }),
+    );
+
+    const peerConnected = DeviceEventEmitter.addListener(
       'RCTMultipeerConnectivityPeerConnected',
       ((event) => {
-        this._peers[event.peer.id].emit('connected');
-        this._connectedPeers[event.peer.id] = this._peers[event.peer.id];
+        this.peers[event.peer.id].emit('connected');
+        this.connectedPeers[event.peer.id] = this.peers[event.peer.id];
         this.emit('peerConnected', event);
-      }).bind(this));
-      
-    var peerConnecting = DeviceEventEmitter.addListener(
+      }),
+    );
+
+    const peerConnecting = DeviceEventEmitter.addListener(
       'RCTMultipeerConnectivityPeerConnecting',
       ((event) => {
-        this._peers[event.peer.id].emit('connecting');
+        this.peers[event.peer.id].emit('connecting');
         this.emit('peerConnecting', event);
-      }).bind(this));
-    
-    var peerDisconnected = DeviceEventEmitter.addListener(
+      }),
+    );
+
+    const peerDisconnected = DeviceEventEmitter.addListener(
       'RCTMultipeerConnectivityPeerDisconnected',
       ((event) => {
-        this._peers[event.peer.id].emit('disconnected');
-        delete this._connectedPeers[event.peer.id];
+        this.peers[event.peer.id].emit('disconnected');
+        delete this.connectedPeers[event.peer.id];
         this.emit('peerDisconnected', event);
-      }).bind(this));
-      
-    var streamOpened = DeviceEventEmitter.addListener(
+      }),
+    );
+
+    const streamOpened = DeviceEventEmitter.addListener(
       'RCTMultipeerConnectivityStreamOpened',
       ((event) => {
         this.emit('streamOpened', event);
-      }).bind(this));
-    
-    var invited = DeviceEventEmitter.addListener(
+      }),
+    );
+
+    const invited = DeviceEventEmitter.addListener(
       'RCTMultipeerConnectivityInviteReceived',
       ((event) => {
-        event.sender = this._peers[event.peer.id];
+        event.sender = this.peers[event.peer.id];
         this.emit('invite', event);
-      }).bind(this));
-      
-    var dataReceived = DeviceEventEmitter.addListener(
+      }),
+    );
+
+    const dataReceived = DeviceEventEmitter.addListener(
       'RCTMultipeerConnectivityDataReceived',
       ((event) => {
-        event.sender = this._peers[event.peer.id];
+        event.sender = this.peers[event.peer.id];
         this.emit('data', event);
-      }).bind(this));
+      }),
+    );
   }
-  
+
   getAllPeers() {
-    return this._peers;
+    return this.peers;
   }
-  
+
   getConnectedPeers() {
-    return this._connectedPeers;
+    return this.connectedPeers;
   }
-  
+
   send(recipients, data, callback) {
     if (!callback) {
       callback = () => {};
