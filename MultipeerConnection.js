@@ -24,10 +24,10 @@ class MultipeerConnection extends EventEmitter {
       'RCTMultipeerConnectivityPeerLost',
       ((event) => {
         const peer = this.peers[event.peer.id];
-        peer.emit('lost');
-        this.emit('peerLost', { peer: { id: peer.id } });
         delete this.peers[event.peer.id];
         delete this.connectedPeers[event.peer.id];
+        peer.emit('lost');
+        this.emit('peerLost', { peer: { id: peer.id } });
       }),
     );
 
