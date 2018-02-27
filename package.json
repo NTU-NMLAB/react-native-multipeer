@@ -1,57 +1,9 @@
 {
-  "_from": "react-native-multipeer@^0.1.1",
-  "_id": "react-native-multipeer@0.1.1",
-  "_inBundle": false,
-  "_integrity": "sha1-usMeKB9kWk8o+AdmAgISqWgu1Ps=",
-  "_location": "/react-native-multipeer",
-  "_phantomChildren": {},
-  "_requested": {
-    "type": "range",
-    "registry": true,
-    "raw": "react-native-multipeer@^0.1.1",
-    "name": "react-native-multipeer",
-    "escapedName": "react-native-multipeer",
-    "rawSpec": "^0.1.1",
-    "saveSpec": null,
-    "fetchSpec": "^0.1.1"
-  },
-  "_requiredBy": [
-    "#DEV:/"
-  ],
-  "_resolved": "https://registry.npmjs.org/react-native-multipeer/-/react-native-multipeer-0.1.1.tgz",
-  "_shasum": "bac31e281f645a4f28f80766020212a9682ed4fb",
-  "_spec": "react-native-multipeer@^0.1.1",
-  "_where": "/Users/wenyu/Documents/NTU-NMLAB/MultiPeerTest",
-  "author": {
-    "name": "Lochlan Wansbrough",
-    "email": "lochie@live.com",
-    "url": "http://lwansbrough.com"
-  },
-  "bugs": {
-    "url": "https://github.com/lwansbrough/react-native-multipeer/issues"
-  },
-  "bundleDependencies": false,
   "dependencies": {
     "events": "^1.0.2"
   },
-  "deprecated": false,
   "description": "Communicate over ad hoc wifi using Multipeer Connectivity",
-  "homepage": "https://github.com/lwansbrough/react-native-multipeer#readme",
-  "keywords": [
-    "react-native",
-    "react",
-    "native",
-    "multipeer",
-    "connectivity",
-    "adhoc",
-    "wifi",
-    "p2p"
-  ],
   "main": "index.js",
   "name": "react-native-multipeer",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/lwansbrough/react-native-multipeer.git"
-  },
   "version": "0.1.1"
 }
