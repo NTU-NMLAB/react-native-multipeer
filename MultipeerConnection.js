@@ -145,6 +145,12 @@ class MultipeerConnection extends EventEmitter {
     this.RCTMultipeerConnectivity.browse(channel);
   }
 
+  stopBrowseAndClearPeers(channel) {
+    this.RCTMultipeerConnectivity.stopBrowse(channel);
+    this.peers = {};
+    this.connectedPeers = {};
+  }
+
   createStreamForPeer(peerId, name, callback = () => {}) {
     this.RCTMultipeerConnectivity.createStreamForPeer(peerId, name, callback);
   }

@@ -27,6 +27,11 @@ RCT_EXPORT_METHOD(browse:(NSString *)channel)
   [self.browser startBrowsingForPeers];
 }
 
+RCT_EXPORT_METHOD(stopBrowse:(NSString *)channel)
+{
+  [self.browser stopBrowsingForPeers];
+}
+
 RCT_EXPORT_METHOD(invite:(NSString *)peerUUID callback:(RCTResponseSenderBlock)callback) {
   MCPeerID *peerID = [self.peers valueForKey:peerUUID];
   [self.browser invitePeer:peerID toSession:self.session withContext:nil timeout:30];
