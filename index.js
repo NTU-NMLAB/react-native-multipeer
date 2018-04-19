@@ -1,5 +1,5 @@
-import MultipeerConnection from './MultipeerConnection';
-import MultipeerConnectionInit from './MultipeerConnectionInit';
+import MultipeerConnection from './classes/MultipeerConnection';
+import MultipeerConnectionInit from './classes/MultipeerConnectionInit';
 
 MultipeerConnectionInit();
 

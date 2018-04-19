@@ -1,5 +1,5 @@
 import MultiPeerActionTypes from './MultiPeer.type';
-import Peer from '../Peer';
+import Peer from '../classes/Peer';
 import MultipeerConnectivity from '../../react-native-multipeer';
 
 const MultiPeerActions = {
