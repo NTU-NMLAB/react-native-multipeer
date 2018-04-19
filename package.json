@@ -1,7 +1,5 @@
 {
-  "dependencies": {
-    "events": "^1.0.2"
-  },
+  "dependencies": {},
   "description": "Communicate over ad hoc wifi using Multipeer Connectivity",
   "main": "index.js",
   "name": "react-native-multipeer",

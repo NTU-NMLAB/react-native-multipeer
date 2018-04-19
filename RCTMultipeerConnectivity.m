@@ -9,32 +9,33 @@
 
 RCT_EXPORT_MODULE()
 
-RCT_EXPORT_METHOD(advertise:(NSString *)channel data:(NSDictionary *)data) {
+RCT_EXPORT_METHOD(advertise:(NSString *)serviceType data:(NSDictionary *)data) {
   self.advertiser =
-  [[MCNearbyServiceAdvertiser alloc] initWithPeer:self.peerID discoveryInfo:data serviceType:channel];
+  [[MCNearbyServiceAdvertiser alloc] initWithPeer:self.peerID discoveryInfo:data serviceType:serviceType];
   self.advertiser.delegate = self;
   [self.advertiser startAdvertisingPeer];
 }
 
-RCT_EXPORT_METHOD(hide:(NSString *)channel) {
+RCT_EXPORT_METHOD(hide) {
   [self.advertiser stopAdvertisingPeer];
 }
 
-RCT_EXPORT_METHOD(browse:(NSString *)channel)
+RCT_EXPORT_METHOD(browse:(NSString *)serviceType)
 {
-  self.browser = [[MCNearbyServiceBrowser alloc] initWithPeer:self.peerID serviceType:channel];
+  self.browser = [[MCNearbyServiceBrowser alloc] initWithPeer:self.peerID serviceType:serviceType];
   self.browser.delegate = self;
   [self.browser startBrowsingForPeers];
 }
 
-RCT_EXPORT_METHOD(stopBrowse:(NSString *)channel)
+RCT_EXPORT_METHOD(stopBrowse)
 {
   [self.browser stopBrowsingForPeers];
 }
 
-RCT_EXPORT_METHOD(invite:(NSString *)peerUUID callback:(RCTResponseSenderBlock)callback) {
+RCT_EXPORT_METHOD(invite:(NSString *)peerUUID peerInfo:(NSDictionary *)peerInfo callback:(RCTResponseSenderBlock)callback) {
   MCPeerID *peerID = [self.peers valueForKey:peerUUID];
-  [self.browser invitePeer:peerID toSession:self.session withContext:nil timeout:30];
+  NSData *context = [NSKeyedArchiver archivedDataWithRootObject:peerInfo];
+  [self.browser invitePeer:peerID toSession:self.session withContext:context timeout:30];
   callback(@[[NSNull null]]);
 }
 
@@ -126,6 +127,7 @@ RCT_EXPORT_METHOD(disconnect:(RCTResponseSenderBlock)callback) {
 
 - (void)advertiser:(MCNearbyServiceAdvertiser *)advertiser didReceiveInvitationFromPeer:(MCPeerID *)peerID withContext:(NSData *)context invitationHandler:(void (^)(BOOL accept, MCSession *session))invitationHandler {
   NSString *invitationUUID = [[NSUUID UUID] UUIDString];
+  NSDictionary *peerInfo = (NSDictionary*) [NSKeyedUnarchiver unarchiveObjectWithData:context];
   [self.invitationHandlers setValue:[invitationHandler copy] forKey:invitationUUID];
   [self.bridge.eventDispatcher sendDeviceEventWithName:@"RCTMultipeerConnectivityInviteReceived"
                               body:@{
@@ -133,8 +135,9 @@ RCT_EXPORT_METHOD(disconnect:(RCTResponseSenderBlock)callback) {
                                   @"id": invitationUUID
                                 },
                                 @"peer": @{
-                                  @"id": peerID.displayName
-                                }
+                                  @"id": peerID.displayName,
+                                  @"info": peerInfo
+                                },
                               }];
 }
 

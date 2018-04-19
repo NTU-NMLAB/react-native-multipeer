@@ -1,154 +1,51 @@
 import { DeviceEventEmitter, NativeModules } from 'react-native';
-import { EventEmitter } from 'events';
-import Peer from './Peer';
+import AppConstants from './constants/App.constant';
 
-class MultipeerConnection extends EventEmitter {
+class MultipeerConnection {
   constructor() {
-    super();
     this.RCTMultipeerConnectivity = NativeModules.MultipeerConnectivity;
-    this.selfName = `User-${Math.round(1e6 * Math.random())}`;
-    this.peers = {};
-    this.connectedPeers = {};
-
-    // Peer found
-    DeviceEventEmitter.addListener(
-      'RCTMultipeerConnectivityPeerFound',
-      ((event) => {
-        const peer = new Peer(event.peer.id, event.peer.info.name);
-        this.peers[peer.id] = peer;
-        this.emit('peerFound', { peer });
-      }),
-    );
-
-    // Peer lost
-    DeviceEventEmitter.addListener(
-      'RCTMultipeerConnectivityPeerLost',
-      ((event) => {
-        const peer = this.peers[event.peer.id];
-        delete this.peers[event.peer.id];
-        delete this.connectedPeers[event.peer.id];
-        peer.emit('lost');
-        this.emit('peerLost', { peer: { id: peer.id } });
-      }),
-    );
-
-    // Peer connected
-    DeviceEventEmitter.addListener(
-      'RCTMultipeerConnectivityPeerConnected',
-      ((event) => {
-        this.peers[event.peer.id].emit('connected');
-        this.connectedPeers[event.peer.id] = this.peers[event.peer.id];
-        this.emit('peerConnected', event);
-      }),
-    );
-
-    // Peer connecting
-    DeviceEventEmitter.addListener(
-      'RCTMultipeerConnectivityPeerConnecting',
-      ((event) => {
-        this.peers[event.peer.id].emit('connecting');
-        this.emit('peerConnecting', event);
-      }),
-    );
-
-    // Peer disconnected
-    DeviceEventEmitter.addListener(
-      'RCTMultipeerConnectivityPeerDisconnected',
-      ((event) => {
-        this.peers[event.peer.id].emit('disconnected');
-        delete this.connectedPeers[event.peer.id];
-        this.emit('peerDisconnected', event);
-      }),
-    );
-
-    // Stream opened
-    DeviceEventEmitter.addListener(
-      'RCTMultipeerConnectivityStreamOpened',
-      ((event) => {
-        this.emit('streamOpened', event);
-      }),
-    );
-
-    // Invited
-    DeviceEventEmitter.addListener(
-      'RCTMultipeerConnectivityInviteReceived',
-      ((event) => {
-        const evt = {
-          ...event,
-          sender: this.peers[event.peer.id],
-        };
-        this.emit('invite', evt);
-      }),
-    );
-
-    // Data received
-    DeviceEventEmitter.addListener(
-      'RCTMultipeerConnectivityDataReceived',
-      ((event) => {
-        const evt = {
-          ...event,
-          sender: this.peers[event.peer.id],
-        };
-        this.emit('data', evt);
-      }),
-    );
   }
 
-  getSelfName() {
-    return this.selfName;
-  }
-
-  getAllPeers() {
-    return this.peers;
-  }
-
-  getConnectedPeers() {
-    return this.connectedPeers;
-  }
-
-  send(recipients, data, callback = () => {}) {
-    const recipientIds = recipients.map((recipient) => {
-      if (recipient instanceof Peer) {
-        return recipient.id;
-      }
-      return recipient;
+  static registerListeners(listeners) {
+    listeners.forEach(({ eventName, handler }) => {
+      DeviceEventEmitter.addListener(eventName, handler);
     });
+  }
 
+  sendData(recipientIds, data, callback = () => {}) {
     this.RCTMultipeerConnectivity.send(recipientIds, data, callback);
   }
 
-  broadcast(data, callback = () => {}) {
+  broadcastData(data, callback = () => {}) {
     this.RCTMultipeerConnectivity.broadcast(data, callback);
   }
 
-  invite(peerId, callback = () => {}) {
-    this.RCTMultipeerConnectivity.invite(peerId, callback);
+  invite(peerId, myInfo, callback = () => {}) {
+    this.RCTMultipeerConnectivity.invite(peerId, myInfo, callback);
   }
 
-  rsvp(inviteId, accept, callback = () => {}) {
+  responseInvite(inviteId, accept, callback = () => {}) {
     this.RCTMultipeerConnectivity.rsvp(inviteId, accept, callback);
   }
 
-  advertise(channel, info) {
-    this.RCTMultipeerConnectivity.advertise(channel, { ...info, name: this.selfName });
+  advertise(info) {
+    this.RCTMultipeerConnectivity.advertise(AppConstants.SERVICE_TYPE, info);
   }
 
-  hide(channel) {
-    this.RCTMultipeerConnectivity.hide(channel);
+  hide() {
+    this.RCTMultipeerConnectivity.hide();
   }
 
   disconnect(callback = () => {}) {
     this.RCTMultipeerConnectivity.disconnect(callback);
   }
 
-  browse(channel) {
-    this.RCTMultipeerConnectivity.browse(channel);
+  browse() {
+    this.RCTMultipeerConnectivity.browse(AppConstants.SERVICE_TYPE);
   }
 
-  stopBrowseAndClearPeers(channel) {
-    this.RCTMultipeerConnectivity.stopBrowse(channel);
-    this.peers = {};
-    this.connectedPeers = {};
+  stopBrowse() {
+    this.RCTMultipeerConnectivity.stopBrowse();
   }
 
   createStreamForPeer(peerId, name, callback = () => {}) {
