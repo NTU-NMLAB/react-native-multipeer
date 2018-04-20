@@ -1,5 +1,6 @@
 import { DeviceEventEmitter, NativeModules } from 'react-native';
 import AppConstants from '../constants/App.constant';
+import MessageType from '../constants/MessageType.constant';
 
 class MultipeerConnection {
   constructor() {
@@ -50,6 +51,19 @@ class MultipeerConnection {
 
   createStreamForPeer(peerId, name, callback = () => {}) {
     this.RCTMultipeerConnectivity.createStreamForPeer(peerId, name, callback);
+  }
+
+  requestInfo(peerId) {
+    this.sendData([peerId], {
+      messageType: MessageType.REQUEST_INFO,
+    });
+  }
+
+  returnInfo(receiverId, info) {
+    this.sendData([receiverId], {
+      messageType: MessageType.RETURN_INFO,
+      info,
+    });
   }
 }
 

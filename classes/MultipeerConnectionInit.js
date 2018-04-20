@@ -19,7 +19,10 @@ export default () => {
     },
     {
       eventName: 'RCTMultipeerConnectivityPeerConnected',
-      handler: event => store.dispatch(MultiPeerActions.onPeerConnected(event.peer.id)),
+      handler: (event) => {
+        store.dispatch(MultiPeerActions.onPeerConnected(event.peer.id));
+        store.dispatch(MultiPeerActions.requestInfo(event.peer.id));
+      },
     },
     {
       eventName: 'RCTMultipeerConnectivityPeerConnecting',
@@ -48,13 +51,10 @@ export default () => {
     },
     {
       eventName: 'RCTMultipeerConnectivityDataReceived',
-      handler: (event) => {
-        const data = {
-          ...event,
-          sender: event.peer.id,
-        };
-        store.dispatch(MultiPeerActions.onDataReceived(data));
-      },
+      handler: event => store.dispatch(MultiPeerActions.onDataReceived(
+        event.sender.id,
+        event.data,
+      )),
     },
   ]);
 

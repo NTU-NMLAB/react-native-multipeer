@@ -78,7 +78,7 @@ RCT_EXPORT_METHOD(disconnect:(RCTResponseSenderBlock)callback) {
   self.connectedPeers = [NSMutableDictionary dictionary];
   self.invitationHandlers = [NSMutableDictionary dictionary];
   self.peerID = [[MCPeerID alloc] initWithDisplayName:[[NSUUID UUID] UUIDString]];
-  self.session = [[MCSession alloc] initWithPeer:self.peerID securityIdentity:nil encryptionPreference:MCEncryptionNone];
+  self.session = [[MCSession alloc] initWithPeer:self.peerID];
   self.session.delegate = self;
   return self;
 }
@@ -144,6 +144,7 @@ RCT_EXPORT_METHOD(disconnect:(RCTResponseSenderBlock)callback) {
 - (void)session:(MCSession *)session peer:(MCPeerID *)peerID didChangeState:(MCSessionState)state {
   if ([peerID.displayName isEqualToString:self.peerID.displayName]) return;
   if (state == MCSessionStateConnected) {
+    [self.peers setValue:peerID forKey:peerID.displayName];
     [self.connectedPeers setValue:peerID forKey:peerID.displayName];
     [self.bridge.eventDispatcher sendDeviceEventWithName:@"RCTMultipeerConnectivityPeerConnected"
                                  body:@{
@@ -172,9 +173,9 @@ RCT_EXPORT_METHOD(disconnect:(RCTResponseSenderBlock)callback) {
   }
 }
 
-- (void)session:(MCSession *)session didReceiveCertificate:(NSArray *)certificate fromPeer:(MCPeerID *)peerID certificateHandler:(void (^)(BOOL accept))certificateHandler {
-  certificateHandler(YES);
-}
+// - (void)session:(MCSession *)session didReceiveCertificate:(NSArray *)certificate fromPeer:(MCPeerID *)peerID certificateHandler:(void (^)(BOOL accept))certificateHandler {
+//   certificateHandler(YES);
+// }
 
 // TODO: Waiting for module interop and/or streams over JS bridge
 

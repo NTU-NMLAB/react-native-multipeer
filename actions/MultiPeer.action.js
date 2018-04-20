@@ -1,6 +1,7 @@
 import MultiPeerActionTypes from './MultiPeer.type';
 import Peer from '../classes/Peer';
 import MultipeerConnectivity from '../../react-native-multipeer';
+import MessageType from '../constants/MessageType.constant';
 
 const MultiPeerActions = {
   init(selfName) {
@@ -53,6 +54,20 @@ const MultiPeerActions = {
       sender,
     };
   },
+  requestInfo(peerId) {
+    MultipeerConnectivity.requestInfo(peerId);
+    return {
+      type: MultiPeerActionTypes.REQUEST_INFO,
+      peerId,
+    };
+  },
+  returnInfo(receiverId, info) {
+    MultipeerConnectivity.returnInfo(receiverId, info);
+    return {
+      type: MultiPeerActionTypes.RETURN_INFO,
+      info,
+    };
+  },
   createStreamForPeer(peerId, name, callback = () => {}) {
     MultipeerConnectivity.createStreamForPeer(peerId, name, callback);
     return {
@@ -91,9 +106,10 @@ const MultiPeerActions = {
     };
   },
   onPeerConnected(peerId) {
+    const peer = new Peer(peerId, '', true, false, '');
     return {
       type: MultiPeerActionTypes.ON_PEER_CONNECTED,
-      peerId,
+      peer,
     };
   },
   onPeerConnecting(peerId) {
@@ -126,10 +142,18 @@ const MultiPeerActions = {
       peer,
     };
   },
-  onDataReceived(data) {
+  onDataReceived(senderId, data) {
     return {
       type: MultiPeerActionTypes.ON_DATA_RECEIVED,
+      senderId,
       data,
+    };
+  },
+  onInfoUpdate(peerId, info) {
+    return {
+      type: MultiPeerActionTypes.ON_INFO_UPDATE,
+      peerId,
+      info,
     };
   },
 };
