@@ -1,242 +1,85 @@
 # react-native-multipeer
 
-Communicate over ad hoc wifi using Multipeer Connectivity.
-
-## Known Issues
-Below is a list of known issues. Pull requests are welcome for any of these issues!
-
-- No support for streams in React Native, so streaming is currently unavailable.
-- No support for resource transfers: I want this to work seamlessly with other file resources for other uses, so I'm waiting for those specs to be finalized.
+A modified version of [this](https://www.npmjs.com/package/react-native-multipeer) npm package
 
 ## Getting started
 
-1. `npm install react-native-multipeer@latest --save`
+1. Add this project as a submodule to your react-native project
 2. In XCode, in the project navigator, right click `Libraries` ➜ `Add Files to [your project's name]`
-3. Go to `node_modules` ➜ `react-native-multipeer` and add `RCTMultipeerConnectivity.xcodeproj`
+3. Go to `[this submodule's path]` ➜ `react-native-multipeer` and add `RCTMultipeerConnectivity.xcodeproj`
 4. In XCode, in the project navigator, select your project. Add `libRCTMultipeerConnectivity.a` to your project's `Build Phases` ➜ `Link Binary With Libraries`
-5. Click `RCTMultipeerConnectivity.xcodeproj` in the project navigator and go the `Build Settings` tab. Make sure 'All' is toggled on (instead of 'Basic'). Look for `Header Search Paths` and make sure it contains both `$(SRCROOT)/../react-native/React` and `$(SRCROOT)/../../React` - mark both as `recursive`.
-5. Run your project (`Cmd+R`)
+5. Click `RCTMultipeerConnectivity.xcodeproj` in the project navigator and go the `Build Settings` tab. Make sure 'All' is toggled on (instead of 'Basic'). Look for `Header Search Paths` and make sure it contains both *`$(SRCROOT)/../react-native/React`* and *`$(SRCROOT)/../../React`* - mark both as `recursive`.
+6. Add *`reducers/MultiPeer.reducer.js`* to your main project's reducer list, i.e. the `combineReducers` function
+7. Add *`middlewares/middlewares.js`* to your main project's middleware list, i.e. the `applyMiddleware` function
+8. Run your main project
 
 ## Usage
 
-All you need is to `require` the `react-native-multipeer` module and then you can start using the singleton instance.
+You can perform the supported methods by **dispatching** actions in *`actions/MultiPeer.action.js`*
+
+*For more detailed usages, please take a look at the following components of [MultiPeerTest](https://github.com/NTU-NMLAB/MultiPeerTest) Project:*
+[PeerList](https://github.com/NTU-NMLAB/MultiPeerTest/blob/master/src/components/smart/partial/PeerList/PeerList.component.js)
+[AdvertiseControl](https://github.com/NTU-NMLAB/MultiPeerTest/blob/master/src/components/smart/partial/AdvertiseControl/AdvertiseControl.component.js)
+
+
+## States Reference
+Following redux pattern, there is a state object recording all the operational status of this submodule. The UI should be in sync with this state, i.e. **`connect`** to the state and update according to it. The state object is of the following shape:
 
 ```javascript
-var React = require('react-native');
-var {
-  AppRegistry,
-  StyleSheet,
-  Text,
-  View,
-  TouchableHighlight
-} = React;
-var MultipeerConnectivity = require('react-native-multipeer');
-
-function getStateFromSources() {
-  var ds = new ListView.DataSource({rowHasChanged: (r1, r2) => r1 !== r2});
-    return {
-      dataSource: ds.cloneWithRows(_.values(MultipeerConnectivity.getAllPeers()))
-    };
-}
-
-var peerApp = React.createClass({
-  getInitialState: function() {
-    return getStateFromSources()
-  },
-  componentDidMount() {
-    MultipeerConnectivity.on('peerFound', this._onChange());
-    MultipeerConnectivity.on('peerLost', this._onChange());
-    MultipeerConnectivity.on('invite', ((event) => {
-      // Automatically accept invitations
-      MultipeerConnectivity.rsvp(event.invite.id, true);
-    }).bind(this));
-    MultipeerConnectivity.on('peerConnected', (event) => {
-      alert(event.peer.id + ' connected!');
-    });
-    MultipeerConnectivity.advertise('channel1', { name: 'User-' + Math.round(1e6 * Math.random()) });
-    MultipeerConnectivity.browse('channel1');
-  },
-
-  renderRow(peer) {
-    return (
-      <TouchableHighlight onPress={this.invite.bind(this, peer)} style={styles.row}>
-        <View>
-          <Text>{peer.name}</Text>
-        </View>
-      </TouchableHighlight>
-    );
-  },
-  
-  render: function() {
-    return (
-      <View style={styles.container}>
-        <ListView
-          style={styles.peers}
-          dataSource={this.state.dataSource}
-          renderRow={this.renderRow}
-        />
-      </View>
-    );
-  },
-  
-  _invite(peer) {
-    MultipeerConnectivity.invite(peer.id);
-  },
-  
-  _onChange() {
-    this.setState(getStateFromSources());
-  }
-});
-
-
-var styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: 'transparent',
-  },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
-  },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-  },
-});
-
-AppRegistry.registerComponent('peerApp', () => peerApp);
+const multipeerState = {
+  selfName: 'User-default',   // String, name of the device itself
+  peers: {                    // An object containing (id: peer) pairs
+    'xxxxxxxxxx': {             // Instance of Peer class
+      id: 'xxxxxxxxxx',           // id of the peer; given by the underlying MultipeerConnectivity Protocol
+      name: 'Foo',                // name of the peer; grabbing from the peer's info
+      connected: false,           // whether the peer is connected with this device
+      invited: false,             // whether this device invited the peer
+      invitationId: '',            // if this device is invited by the peer but not responses yet, this property will contain a value; otherwise it will be an empty string
+    },
+  }, 
+  isBrowsing: false,          // A boolean flag recording if this device is browsing
+  isAdvertising: false,       // A boolean flag recording if this device is advertising
+};
 ```
 
-## `MultipeerConnectivity` methods
+## Redux Action Creator Reference
+To update the state above and further refresh UI, all you need is to **`dispatch`** actions via following action-creators, which are defined in *`action/MultiPeer.action.js`*.
 
-### Channels
+#### `init(selfName)`
+Initialize the underlying MultipeerConnectivity agent. This will be called programmatically when the app starts. (see `classes/MultipeerConnectionInit.js`)
 
-#### `advertise(channelId, info)`
+#### `browse()`
+Browse for nearby peers that are advertising. When peers are found, they will be inserted into `peers` in the `state` object.
 
-Allow discovery of yourself as a peer in a given channel. `channelId` can be any string. `info` is an object containing data which will be passed to other peers when you join the channel.
+#### `stopBrowse()`
+The cancellation of `browse()`.
 
-#### `hide(channelID)`
+#### `advertise(info)`
+Allow discovery of yourself as a peer in the neighborhood. `info` is an object containing data which will be passed to other peers when they find you; it should at least contain `'name'` property, which is your `selfName`. When you are advertising, you will be found by nearby devices that have already called `browse()` action creator. If they find you and send an invitation to you, they will be inserted into `peers` in your `state` object, with an `invitationId`.
 
-The cancellation of `advertise`. Deny discovery of yourself as a peer in a given channel. `channelID` must be the name of channel you have joined.
+#### `hide()`
+The cancellation of `advertise()`. Deny discovery of yourself as a peer. If you call this, all the peers that have ever `invite` you will be lost from `peers` in your `state`, no matter you two are connected or not.
 
-#### `browse(channelId)`
+#### `invite(peerId, myInfo, callback)`
+Invite a peer into your session. You can only call this when you find someone via `browse` and you two are not connected yet. `myInfo` should at least contain `'name'` property, which is your `selfName`. `callback` will be executed after the invitation is sent.
 
-Browse for peers on a given channel.
+#### `responseInvite(sender, accept, callback)`
+Response an invitation from `sender`, which should be the sender's `name`. You can only call this when the sender's `invitationId` in your `state` is not empty, i.e., the sender has sent an invitation to you. `accept` is a boolean. If `accept === true`, You two will become connected. `callback` will be executed after the response is sent.
 
-#### `getAllPeers()`
+#### `requestInfo(peerId)`
+Request peer's info. This is called programmatically when peer's are connected; since they probably don't have each other's info. (see `classes/MultipeerConnectionInit.js`)
 
-Gets all the peers in the current channel.
+#### `returnInfo(receiverId, info)`
+Return self's info when requested by peers. This is called programmatically when the peer send info-request to you. (see `middlewares/middlewares.js`)
 
+#### `sendData(recipients, data, callback)`
+Send `data`, which is a json object, to `recipients`, which is an array of `Peer` or peerId. `callback` will be executed after the data are sent.
 
-### Sessions
+#### `broadcastData(data, callback)`
+Send `data`, which is a json object, to all of your connected peers. `callback` will be executed after the data are sent.
 
-#### `getConnectedPeers()`
+#### `createStreamForPeer(peerId, name, callback)`
+**This is not implemented yet.** Create data streaming to a peer.
 
-Gets all the peers in the current session.
-
-
-#### `disconnect([callback])`
-
-Disconnect from the current session.
-
-
-#### `invite(peerId [, callback])`
-
-Invite a peer from your channel into your session.
-
-
-#### `rsvp(inviteId, accept [, callback])`
-
-Accept/decline a session invitation.
-
-
-### Communication
-
-#### `broadcast(data [, callback<err>])`
-
-Send data to all connected peers in the current channel.
-
-
-#### `send(data, recipients [, callback<err>])`
-
-Send data to specific peers in the current channel. `recipients` is an array of peer IDs or `Peer`s.
-
-### `MultipeerConnectivity` Events
-
-`MultipeerConnectivity` inherits from `EventEmitter` - as such the `.on` method is available for listening to important events. Below is a list of those events.
-
-#### `data`
-
-Event properties: `Peer sender`, `data`
-
-Fired when new data is received from `sender`.
-
-#### `peerFound`
-
-Event properties: `peer`
-
-A new peer was found in the current channel.
-
-
-#### `peerLost`
-
-Event properties: `peer`
-
-A peer left the current channel.
-
-#### `peerConnected`
-
-Event properties: `peer`
-
-A peer has connected to your session.
-
-#### `peerConnecting`
-
-Event properties: `peer`
-
-A peer is connecting to your session.
-
-#### `peerDisconnected`
-
-Event properties: `peer`
-
-A peer disconnected from your session.
-
-#### `invite`
-
-Event properties: `sender`, `invite`
-
-You have been invited to a session.
-
-
-## `Peer` methods
-
-### Events
-
-#### `connected`
-
-The peer connected to the current session.
-
-
-#### `connecting`
-
-The peer is connecting to the current session.
-
-
-#### `disconnected`
-
-The peer disconnected from the current session.
-
-#### `lost`
-
-The peer left the current channel.
-
-
-## Todo
-These are some features I think would be important/beneficial to have included with this module. Pull requests welcome!
-
-- [ ] Stream support
-- [ ] Resource transfers
+#### `disconnect(callback)`
+Disconnect with all of peers. `callback` will be executed when all peers are disconnected.

@@ -1,7 +1,6 @@
 import MultiPeerActionTypes from './MultiPeer.type';
 import Peer from '../classes/Peer';
 import MultipeerConnectivity from '../../react-native-multipeer';
-import MessageType from '../constants/MessageType.constant';
 
 const MultiPeerActions = {
   init(selfName) {
@@ -20,12 +19,6 @@ const MultiPeerActions = {
     MultipeerConnectivity.stopBrowse();
     return {
       type: MultiPeerActionTypes.STOP_BROWSE,
-    };
-  },
-  disconnect(callback = () => {}) {
-    MultipeerConnectivity.disconnect(callback);
-    return {
-      type: MultiPeerActionTypes.DISCONNECT,
     };
   },
   advertise(info = {}) {
@@ -68,12 +61,6 @@ const MultiPeerActions = {
       info,
     };
   },
-  createStreamForPeer(peerId, name, callback = () => {}) {
-    MultipeerConnectivity.createStreamForPeer(peerId, name, callback);
-    return {
-      type: MultiPeerActionTypes.CREATE_STREAM_FOR_PEER,
-    };
-  },
   sendData(recipients, data, callback = () => {}) {
     const recipientIds = recipients.map((recipient) => {
       if (recipient instanceof Peer) {
@@ -90,6 +77,18 @@ const MultiPeerActions = {
     MultipeerConnectivity.broadcastData(data, callback);
     return {
       type: MultiPeerActionTypes.BROADCAST_DATA,
+    };
+  },
+  createStreamForPeer(peerId, name, callback = () => {}) {
+    MultipeerConnectivity.createStreamForPeer(peerId, name, callback);
+    return {
+      type: MultiPeerActionTypes.CREATE_STREAM_FOR_PEER,
+    };
+  },
+  disconnect(callback = () => {}) {
+    MultipeerConnectivity.disconnect(callback);
+    return {
+      type: MultiPeerActionTypes.DISCONNECT,
     };
   },
   onPeerFound(peerId, peerName) {
