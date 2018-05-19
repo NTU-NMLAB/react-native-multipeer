@@ -1,5 +1,5 @@
 import MultipeerConnection from './MultipeerConnection';
-import MultiPeerActions from '../actions/MultiPeer.action';
+import MultiPeerActions from '../../../actions/multiPeer.action';
 import { store } from '../../../../App';
 
 export default () => {
@@ -8,33 +8,33 @@ export default () => {
   MultipeerConnection.registerListeners([
     {
       eventName: 'RCTMultipeerConnectivityPeerFound',
-      handler: event => store.dispatch(MultiPeerActions.onPeerFound(
+      handler: event => store.dispatch(MultiPeerActions.backend.onPeerFound(
         event.peer.id,
-        event.peer.info.name,
+        event.peer.info,
       )),
     },
     {
       eventName: 'RCTMultipeerConnectivityPeerLost',
-      handler: event => store.dispatch(MultiPeerActions.onPeerLost(event.peer.id)),
+      handler: event => store.dispatch(MultiPeerActions.backend.onPeerLost(event.peer.id)),
     },
     {
       eventName: 'RCTMultipeerConnectivityPeerConnected',
       handler: (event) => {
-        store.dispatch(MultiPeerActions.onPeerConnected(event.peer.id));
-        store.dispatch(MultiPeerActions.requestInfo(event.peer.id));
+        store.dispatch(MultiPeerActions.backend.onPeerConnected(event.peer.id));
+        store.dispatch(MultiPeerActions.backend.requestInfo(event.peer.id));
       },
     },
     {
       eventName: 'RCTMultipeerConnectivityPeerConnecting',
-      handler: event => store.dispatch(MultiPeerActions.onPeerConnecting(event.peer.id)),
+      handler: event => store.dispatch(MultiPeerActions.backend.onPeerConnecting(event.peer.id)),
     },
     {
       eventName: 'RCTMultipeerConnectivityPeerDisconnected',
-      handler: event => store.dispatch(MultiPeerActions.onPeerDisconnected(event.peer.id)),
+      handler: event => store.dispatch(MultiPeerActions.backend.onPeerDisconnected(event.peer.id)),
     },
     {
       eventName: 'RCTMultipeerConnectivityStreamOpened',
-      handler: event => store.dispatch(MultiPeerActions.onStreamOpened(event)),
+      handler: event => store.dispatch(MultiPeerActions.backend.onStreamOpened(event)),
     },
     {
       eventName: 'RCTMultipeerConnectivityInviteReceived',
@@ -43,24 +43,24 @@ export default () => {
           id: event.invite.id,
           sender: {
             id: event.peer.id,
-            name: event.peer.info.name,
+            info: event.peer.info,
           },
         };
-        store.dispatch(MultiPeerActions.onInviteReceived(invitation));
+        store.dispatch(MultiPeerActions.backend.onInviteReceived(invitation));
       },
     },
     {
       eventName: 'RCTMultipeerConnectivityDataReceived',
-      handler: event => store.dispatch(MultiPeerActions.onDataReceived(
+      handler: event => store.dispatch(MultiPeerActions.backend.onDataReceived(
         event.sender.id,
         event.data,
       )),
     },
   ]);
 
-  // Workaround: wait for MultiPeerActions to be loaded
+  // Workaround: wait for MultiPeerActions.backend to be loaded
   setTimeout(() => {
-    store.dispatch(MultiPeerActions.init(selfName));
+    store.dispatch(MultiPeerActions.backend.init(selfName));
   });
 };
 

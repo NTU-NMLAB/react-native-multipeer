@@ -1,6 +1,7 @@
 import { DeviceEventEmitter, NativeModules } from 'react-native';
 import AppConstants from '../constants/App.constant';
 import MessageType from '../constants/MessageType.constant';
+import { Alert } from 'react-native'
 
 class MultipeerConnection {
   constructor() {

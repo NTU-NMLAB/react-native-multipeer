@@ -1,5 +1,5 @@
 const AppConstants = {
-  SERVICE_TYPE: 'nmlab-mpt',
+  SERVICE_TYPE: 'nmlab-iteach',
 };
 
 export default AppConstants;
