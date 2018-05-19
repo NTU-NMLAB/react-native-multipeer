@@ -1,141 +1,203 @@
-import MultiPeerActionTypes from '../actions/MultiPeer.type';
+import { Alert } from 'react-native'
+import { PeerStatus } from '../classes/Peer'
 
-const initState = {
-  selfName: 'User-default',
+const initialState = {
+  selfName: '',
   peers: {},
+  courses: {}, // peer ids that have endered a course: peerId in state.multiPeer.courses['name']
   isBrowsing: false,
   isAdvertising: false,
-};
+  status: PeerStatus.IDLE, // idle, releasing, viewing, searching
+}
 
-export default (state = initState, action) => {
-  switch (action.type) {
-    case MultiPeerActionTypes.INIT:
-      return {
-        ...initState,
-        selfName: action.selfName,
-      };
-    case MultiPeerActionTypes.BROWSE:
-      return {
-        ...state,
-        isBrowsing: true,
-      };
-    case MultiPeerActionTypes.STOP_BROWSE: {
-      return {
-        ...state,
-        isBrowsing: false,
-      };
-    }
-    case MultiPeerActionTypes.DISCONNECT:
-      return {
-        ...initState,
-        selfName: state.selfName,
-      };
-    case MultiPeerActionTypes.ADVERTISE:
+const reducerMap = {
+  common: {
+    setStatus: (state, action) => ({
+      ...state,
+      multiPeer: {
+        ...state.multiPeer,
+        status: action.payload,
+      },
+    }),
+  },
+  backend: {
+    init: (state, action) => {
       return {
         ...state,
-        isAdvertising: true,
-      };
-    case MultiPeerActionTypes.HIDE: {
-      const peers = {};
-      Object.keys(state.peers).forEach((peerId) => {
-        if (state.peers[peerId].invitationId === '') {
-          peers[peerId] = state.peers[peerId];
+        multiPeer: {
+          ...state.multiPeer,
+          selfName: action.payload.selfName,
+        },
+      }
+    },
+    browse: (state) => {
+      return {
+        ...state,
+        multiPeer: {
+          ...state.multiPeer,
+          isBrowsing: true,
+        },
+      }
+    },
+    stopBrowse: (state) => {
+      return {
+        ...state,
+        multiPeer: {
+          ...state.multiPeer,
+          isBrowsing: false,
+        },
+      }
+    },
+    disconnect: (state) => {
+      return {
+        ...state,
+        multiPeer: {
+          ...state.multiPeer,
+          selfName: state.multiPeer.selfName,
+        },
+      }
+    },
+    advertise: (state) => {
+      return {
+        ...state,
+        multiPeer: {
+          ...state.multiPeer,
+          isAdvertising: true,
+        },
+      }
+    },
+    hide: (state) => {
+      const peers = {}
+      Object.keys(state.multiPeer.peers).forEach((peerId) => {
+        if (state.multiPeer.peers[peerId].invitationId === '') {
+          peers[peerId] = state.multiPeer.peers[peerId]
         }
-      });
+      })
       return {
         ...state,
-        isAdvertising: false,
-        peers,
-      };
-    }
-    case MultiPeerActionTypes.INVITE: {
-      if (!(action.peerId in state.peers) || state.peers[action.peerId].connected) {
-        return state;
-      }
-      const peer = state.peers[action.peerId];
-      peer.invited = true;
-      return {
-        ...state,
-        peers: {
-          ...state.peers,
-          [action.peerId]: peer,
+        multiPeer: {
+          ...state.multiPeer,
+          isAdvertising: false,
+          peers,
         },
-      };
-    }
-    case MultiPeerActionTypes.ON_PEER_FOUND: {
-      if (action.peer.id in state.peers) {
-        return state;
       }
+    },
+    invite: (state, action) => {
+      if (!(action.payload.peerId in state.multiPeer.peers) ||
+          state.multiPeer.peers[action.payload.peerId].connected) {
+        return state
+      }
+      const peer = state.multiPeer.peers[action.payload.peerId]
+      peer.invited = true
       return {
         ...state,
-        peers: {
-          ...state.peers,
-          [action.peer.id]: action.peer,
+        multiPeer: {
+          ...state.multiPeer,
+          peers: {
+            ...state.multiPeer.peers,
+            [action.payload.peerId]: peer,
+          },
         },
-      };
-    }
-    case MultiPeerActionTypes.ON_PEER_LOST: {
-      if (!(action.peerId in state.peers)) {
-        return state;
       }
-      const peers = Object.assign({}, state.peers);
-      delete peers[action.peerId];
+    },
+    onPeerFoundSet: (state, action) => {
+      const foundPeer = action.payload.peer
+      foundPeer.online = true
+      const { courses } = state.multiPeer
+      if (!(foundPeer.info.course in courses)) {
+        courses[foundPeer.info.course] = {}
+      }
+      courses[foundPeer.info.course][foundPeer.id] = true
       return {
         ...state,
-        peers,
-      };
-    }
-    case MultiPeerActionTypes.ON_PEER_CONNECTED: {
-      const peer = Object.assign({}, action.peer);
-      if (peer.id in state.peers) {
-        peer.name = state.peers[peer.id].name;
-      }
-      return {
-        ...state,
-        peers: {
-          ...state.peers,
-          [peer.id]: peer,
+        multiPeer: {
+          ...state.multiPeer,
+          peers: {
+            ...state.multiPeer.peers,
+            [foundPeer.id]: foundPeer,
+          },
+          courses,
         },
-      };
-    }
-    case MultiPeerActionTypes.ON_PEER_DISCONNECTED: {
-      if (!(action.peerId in state.peers)) {
-        return state;
       }
-      const peers = Object.assign({}, state.peers);
-      delete peers[action.peerId];
+    },
+    onPeerLostSet: (state, action) => {
+      if (!(action.payload.peer.id in state.multiPeer.peers)) {
+        return state
+      }
+      const peers = Object.assign({}, state.multiPeer.peers)
+      peers[action.payload.peer.id].online = false
       return {
         ...state,
-        peers,
-      };
-    }
-    case MultiPeerActionTypes.ON_INVITE_RECEIVED: {
-      if (action.peer.id in state.peers) {
-        return state;
-      }
-      return {
-        ...state,
-        peers: {
-          ...state.peers,
-          [action.peer.id]: action.peer,
+        multiPeer: {
+          ...state.multiPeer,
+          peers,
         },
-      };
-    }
-    case MultiPeerActionTypes.ON_INFO_UPDATE: {
-      if (!(action.peerId in state.peers)) {
-        return state;
       }
-      const peer = state.peers[action.peerId];
-      peer.name = action.info.name;
+    },
+    onPeerConnected: (state, action) => {
+      let peer = Object.assign({}, action.payload.peer)
+      if (peer.id in state.multiPeer.peers) {
+        peer = state.multiPeer.peers[peer.id]
+        peer.connected = true
+        peer.online = true
+      }
       return {
         ...state,
-        peers: {
-          ...state.peers,
-          [action.peerId]: peer,
+        multiPeer: {
+          ...state.multiPeer,
+          peers: {
+            ...state.multiPeer.peers,
+            [peer.id]: peer,
+          },
         },
-      };
-    }
-    default:
-      return state;
-  }
-};
+      }
+    },
+    onPeerDisconnected: (state, action) => {
+      if (!(action.payload.peerId in state.multiPeer.peers)) {
+        return state
+      }
+      const peers = Object.assign({}, state.multiPeer.peers)
+      peers[action.payload.peerId].online = false
+      peers[action.payload.peerId].connected = false
+      return {
+        ...state,
+        multiPeer: {
+          ...state.multiPeer,
+          peers,
+        },
+      }
+    },
+    onInviteReceivedSet: (state, action) => {
+      const inviterPeer = action.payload.peer
+      return {
+        ...state,
+        multiPeer: {
+          ...state.multiPeer,
+          peers: {
+            ...state.multiPeer.peers,
+            [inviterPeer.id]: inviterPeer,
+          },
+        },
+      }
+    },
+    onInfoUpdate: (state, action) => {
+      if (!(action.payload.peerId in state.multiPeer.peers)) {
+        return state
+      }
+      const peer = state.multiPeer.peers[action.payload.peerId]
+      peer.name = action.payload.info.name
+      return {
+        ...state,
+        multiPeer: {
+          ...state.multiPeer,
+          peers: {
+            ...state.multiPeer.peers,
+            [action.payload.peerId]: peer,
+          },
+        },
+      }
+    },
+  },
+}
+
+export default { reducerMap, initialState }

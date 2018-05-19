@@ -1,6 +1,6 @@
 import MultipeerConnection from './MultipeerConnection';
 import MultiPeerActions from '../actions/MultiPeer.action';
-import store from '../../../components/smart/app/Store';
+import { store } from '../../../../App';
 
 export default () => {
   const selfName = `User-${Math.round(1e6 * Math.random())}`;
