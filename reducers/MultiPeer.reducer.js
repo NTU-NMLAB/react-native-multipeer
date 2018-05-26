@@ -1,5 +1,6 @@
 import { Alert } from 'react-native'
 import { PeerStatus } from '../classes/Peer'
+import appConstants from '../constants/App.constant'
 
 const initialState = {
   selfName: '',
@@ -102,6 +103,9 @@ const reducerMap = {
     },
     onPeerFoundSet: (state, action) => {
       const foundPeer = action.payload.peer
+      if (foundPeer.info.service !== appConstants.SERVICE_TYPE) {
+        return state
+      }
       foundPeer.online = true
       const { courses } = state.multiPeer
       if (!(foundPeer.info.course in courses)) {
@@ -121,7 +125,8 @@ const reducerMap = {
       }
     },
     onPeerLostSet: (state, action) => {
-      if (!(action.payload.peer.id in state.multiPeer.peers)) {
+      if (action.payload.peer.info !== appConstants.SERVICE_TYPE
+        || !(action.payload.peer.id in state.multiPeer.peers)) {
         return state
       }
       const peers = Object.assign({}, state.multiPeer.peers)
@@ -181,7 +186,8 @@ const reducerMap = {
       }
     },
     onInfoUpdate: (state, action) => {
-      if (!(action.payload.peerId in state.multiPeer.peers)) {
+      if (action.payload.info.service !== appConstants.SERVICE_TYPE
+        || !(action.payload.peerId in state.multiPeer.peers)) {
         return state
       }
       const peer = state.multiPeer.peers[action.payload.peerId]
