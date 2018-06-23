@@ -1,4 +1,4 @@
-import MultipeerConnection from './MultipeerConnection';
+import MultipeerConnection from './MultipeerConnection.class';
 import MultiPeerActions from '../../../actions/multiPeer.action';
 import { store } from '../../../../App';
 

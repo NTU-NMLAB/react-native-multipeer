@@ -1,5 +1,5 @@
 import { Alert } from 'react-native'
-import { PeerStatus } from '../classes/Peer'
+import { PeerStatus } from '../classes/Peer.class'
 import appConstants from '../constants/App.constant'
 
 const initialState = {
