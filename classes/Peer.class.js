@@ -4,7 +4,7 @@ export default class Peer {
     this.info = {
       isTeacher: 'false',
       username: '', // name of user represented by this peer
-      course: '', // current active course
+      currCourseId: '', // current active course id
       releasing: false, // teacher releasing
       ...info,
     }

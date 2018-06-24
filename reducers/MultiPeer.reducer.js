@@ -5,7 +5,7 @@ import appConstants from '../constants/App.constant'
 const initialState = {
   selfName: '',
   peers: {},
-  courses: {}, // peer ids that have endered a course: peerId in state.multiPeer.courses['name']
+  courses: {}, // peer ids that have endered a course: peerId in state.multiPeer.courses['courseId']
   isBrowsing: false,
   isAdvertising: false,
   status: PeerStatus.IDLE, // idle, releasing, viewing, searching
@@ -108,10 +108,10 @@ const reducerMap = {
       }
       foundPeer.online = true
       const { courses } = state.multiPeer
-      if (!(foundPeer.info.course in courses)) {
-        courses[foundPeer.info.course] = {}
+      if (!(foundPeer.info.currCourseId in courses)) {
+        courses[foundPeer.info.currCourseId] = {}
       }
-      courses[foundPeer.info.course][foundPeer.id] = true
+      courses[foundPeer.info.currCourseId][foundPeer.id] = true
       return {
         ...state,
         multiPeer: {
