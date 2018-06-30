@@ -1,3 +1,4 @@
+import { AsyncStorage } from 'react-native'
 import { PeerStatus } from '../classes/Peer.class'
 import appConstants from '../constants/App.constant'
 
@@ -27,6 +28,16 @@ const reducerMap = {
         multiPeer: {
           ...state.multiPeer,
           selfName: action.payload.selfName,
+        },
+      }
+    },
+    loadPeerFromStorage: (state, action) => {
+      return {
+        ...state,
+        multiPeer: {
+          ...state.multiPeer,
+          peers: action.payload.peers,
+          courses: action.payload.courses,
         },
       }
     },
@@ -67,18 +78,11 @@ const reducerMap = {
       }
     },
     hide: (state) => {
-      const peers = {}
-      Object.keys(state.multiPeer.peers).forEach((peerId) => {
-        if (state.multiPeer.peers[peerId].invitationId === '') {
-          peers[peerId] = state.multiPeer.peers[peerId]
-        }
-      })
       return {
         ...state,
         multiPeer: {
           ...state.multiPeer,
           isAdvertising: false,
-          peers,
         },
       }
     },
@@ -101,29 +105,12 @@ const reducerMap = {
       }
     },
     onPeerFoundSet: (state, action) => {
-      const foundPeer = action.payload.peer
-      if (foundPeer.info.service !== appConstants.SERVICE_TYPE) {
-        return state
-      }
-      foundPeer.online = true
-      const { courses } = state.multiPeer
-      if (!(foundPeer.info.currCourseId in courses)) {
-        courses[foundPeer.info.currCourseId] = {}
-      }
-      courses[foundPeer.info.currCourseId][foundPeer.id] = true
-      const peers = {}
-      Object.values(state.multiPeer.peers)
-        .filter(p => p.info.selfName !== foundPeer.info.selfName)
-        .forEach((p) => { peers[p.id] = p })
       return {
         ...state,
         multiPeer: {
           ...state.multiPeer,
-          peers: {
-            ...peers,
-            [foundPeer.id]: foundPeer,
-          },
-          courses,
+          peers: action.payload.peers,
+          courses: action.payload.courses,
         },
       }
     },
@@ -176,19 +163,11 @@ const reducerMap = {
       }
     },
     onInviteReceivedSet: (state, action) => {
-      const inviterPeer = action.payload.peer
-      const peers = {}
-      Object.values(state.multiPeer.peers)
-        .filter(p => p.info.selfName !== inviterPeer.info.selfName)
-        .forEach((p) => { peers[p.id] = p })
       return {
         ...state,
         multiPeer: {
           ...state.multiPeer,
-          peers: {
-            ...peers,
-            [inviterPeer.id]: inviterPeer,
-          },
+          peers: action.payload.peers,
         },
       }
     },

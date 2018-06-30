@@ -9,7 +9,6 @@ export default () => {
     {
       eventName: 'RCTMultipeerConnectivityPeerFound',
       handler: (event) => {
-        console.log('event:', event)
         store.dispatch(MultiPeerActions.backend.onPeerFound(
           event.peer.id,
           event.peer.info,
