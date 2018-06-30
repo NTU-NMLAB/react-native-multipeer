@@ -1,17 +1,20 @@
-import MultipeerConnection from './MultipeerConnection.class';
-import MultiPeerActions from '../../../actions/multiPeer.action';
-import { store } from '../../../../App';
+import MultipeerConnection from './MultipeerConnection.class'
+import MultiPeerActions from '../../../actions/multiPeer.action'
+import { store } from '../../../../App'
 
 export default () => {
-  const selfName = `User-${Math.round(1e6 * Math.random())}`;
+  // const selfName = `User-${Math.round(1e6 * Math.random())}`
 
   MultipeerConnection.registerListeners([
     {
       eventName: 'RCTMultipeerConnectivityPeerFound',
-      handler: event => store.dispatch(MultiPeerActions.backend.onPeerFound(
-        event.peer.id,
-        event.peer.info,
-      )),
+      handler: (event) => {
+        console.log('event:', event)
+        store.dispatch(MultiPeerActions.backend.onPeerFound(
+          event.peer.id,
+          event.peer.info,
+        ))
+      },
     },
     {
       eventName: 'RCTMultipeerConnectivityPeerLost',
@@ -20,8 +23,8 @@ export default () => {
     {
       eventName: 'RCTMultipeerConnectivityPeerConnected',
       handler: (event) => {
-        store.dispatch(MultiPeerActions.backend.onPeerConnected(event.peer.id));
-        store.dispatch(MultiPeerActions.backend.requestInfo(event.peer.id));
+        store.dispatch(MultiPeerActions.backend.onPeerConnected(event.peer.id))
+        store.dispatch(MultiPeerActions.backend.requestInfo(event.peer.id))
       },
     },
     {
@@ -45,8 +48,8 @@ export default () => {
             id: event.peer.id,
             info: event.peer.info,
           },
-        };
-        store.dispatch(MultiPeerActions.backend.onInviteReceived(invitation));
+        }
+        store.dispatch(MultiPeerActions.backend.onInviteReceived(invitation))
       },
     },
     {
@@ -56,11 +59,11 @@ export default () => {
         event.data,
       )),
     },
-  ]);
+  ])
 
   // Workaround: wait for MultiPeerActions.backend to be loaded
   setTimeout(() => {
-    store.dispatch(MultiPeerActions.backend.init(selfName));
-  });
-};
+    store.dispatch(MultiPeerActions.backend.init())
+  })
+}
 

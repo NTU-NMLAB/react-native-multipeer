@@ -1,4 +1,3 @@
-import { Alert } from 'react-native'
 import { PeerStatus } from '../classes/Peer.class'
 import appConstants from '../constants/App.constant'
 
@@ -22,7 +21,7 @@ const reducerMap = {
     }),
   },
   backend: {
-    init: (state, action) => {
+    setSelfName: (state, action) => {
       return {
         ...state,
         multiPeer: {
@@ -112,12 +111,16 @@ const reducerMap = {
         courses[foundPeer.info.currCourseId] = {}
       }
       courses[foundPeer.info.currCourseId][foundPeer.id] = true
+      const peers = {}
+      Object.values(state.multiPeer.peers)
+        .filter(p => p.info.selfName !== foundPeer.info.selfName)
+        .forEach((p) => { peers[p.id] = p })
       return {
         ...state,
         multiPeer: {
           ...state.multiPeer,
           peers: {
-            ...state.multiPeer.peers,
+            ...peers,
             [foundPeer.id]: foundPeer,
           },
           courses,
@@ -174,12 +177,16 @@ const reducerMap = {
     },
     onInviteReceivedSet: (state, action) => {
       const inviterPeer = action.payload.peer
+      const peers = {}
+      Object.values(state.multiPeer.peers)
+        .filter(p => p.info.selfName !== inviterPeer.info.selfName)
+        .forEach((p) => { peers[p.id] = p })
       return {
         ...state,
         multiPeer: {
           ...state.multiPeer,
           peers: {
-            ...state.multiPeer.peers,
+            ...peers,
             [inviterPeer.id]: inviterPeer,
           },
         },
