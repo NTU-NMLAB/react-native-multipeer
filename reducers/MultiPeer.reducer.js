@@ -1,4 +1,3 @@
-import { AsyncStorage } from 'react-native'
 import { PeerStatus } from '../classes/Peer.class'
 import appConstants from '../constants/App.constant'
 
@@ -22,70 +21,56 @@ const reducerMap = {
     }),
   },
   backend: {
-    setSelfName: (state, action) => {
-      return {
-        ...state,
-        multiPeer: {
-          ...state.multiPeer,
-          selfName: action.payload.selfName,
-        },
-      }
-    },
-    loadPeerFromStorage: (state, action) => {
-      return {
-        ...state,
-        multiPeer: {
-          ...state.multiPeer,
-          peers: action.payload.peers,
-          courses: action.payload.courses,
-        },
-      }
-    },
-    browse: (state) => {
-      return {
-        ...state,
-        multiPeer: {
-          ...state.multiPeer,
-          isBrowsing: true,
-        },
-      }
-    },
-    stopBrowse: (state) => {
-      return {
-        ...state,
-        multiPeer: {
-          ...state.multiPeer,
-          isBrowsing: false,
-        },
-      }
-    },
-    disconnect: (state) => {
-      return {
-        ...state,
-        multiPeer: {
-          ...state.multiPeer,
-          selfName: state.multiPeer.selfName,
-        },
-      }
-    },
-    advertise: (state) => {
-      return {
-        ...state,
-        multiPeer: {
-          ...state.multiPeer,
-          isAdvertising: true,
-        },
-      }
-    },
-    hide: (state) => {
-      return {
-        ...state,
-        multiPeer: {
-          ...state.multiPeer,
-          isAdvertising: false,
-        },
-      }
-    },
+    setSelfName: (state, action) => ({
+      ...state,
+      multiPeer: {
+        ...state.multiPeer,
+        selfName: action.payload.selfName,
+      },
+    }),
+    loadPeerFromStorage: (state, action) => ({
+      ...state,
+      multiPeer: {
+        ...state.multiPeer,
+        peers: action.payload.peers,
+        courses: action.payload.courses,
+      },
+    }),
+    browse: state => ({
+      ...state,
+      multiPeer: {
+        ...state.multiPeer,
+        isBrowsing: true,
+      },
+    }),
+    stopBrowse: state => ({
+      ...state,
+      multiPeer: {
+        ...state.multiPeer,
+        isBrowsing: false,
+      },
+    }),
+    disconnect: state => ({
+      ...state,
+      multiPeer: {
+        ...state.multiPeer,
+        selfName: state.multiPeer.selfName,
+      },
+    }),
+    advertise: state => ({
+      ...state,
+      multiPeer: {
+        ...state.multiPeer,
+        isAdvertising: true,
+      },
+    }),
+    hide: state => ({
+      ...state,
+      multiPeer: {
+        ...state.multiPeer,
+        isAdvertising: false,
+      },
+    }),
     invite: (state, action) => {
       if (!(action.payload.peerId in state.multiPeer.peers) ||
           state.multiPeer.peers[action.payload.peerId].connected) {
@@ -104,16 +89,14 @@ const reducerMap = {
         },
       }
     },
-    onPeerFoundSet: (state, action) => {
-      return {
-        ...state,
-        multiPeer: {
-          ...state.multiPeer,
-          peers: action.payload.peers,
-          courses: action.payload.courses,
-        },
-      }
-    },
+    onPeerFoundSet: (state, action) => ({
+      ...state,
+      multiPeer: {
+        ...state.multiPeer,
+        peers: action.payload.peers,
+        courses: action.payload.courses,
+      },
+    }),
     onPeerLostSet: (state, action) => {
       if (action.payload.peer.info !== appConstants.SERVICE_TYPE
         || !(action.payload.peer.id in state.multiPeer.peers)) {
@@ -162,15 +145,13 @@ const reducerMap = {
         },
       }
     },
-    onInviteReceivedSet: (state, action) => {
-      return {
-        ...state,
-        multiPeer: {
-          ...state.multiPeer,
-          peers: action.payload.peers,
-        },
-      }
-    },
+    onInviteReceivedSet: (state, action) => ({
+      ...state,
+      multiPeer: {
+        ...state.multiPeer,
+        peers: action.payload.peers,
+      },
+    }),
     onInfoUpdate: (state, action) => {
       if (action.payload.info.service !== appConstants.SERVICE_TYPE
         || !(action.payload.peerId in state.multiPeer.peers)) {
