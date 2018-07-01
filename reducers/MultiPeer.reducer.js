@@ -28,7 +28,7 @@ const reducerMap = {
         selfName: action.payload.selfName,
       },
     }),
-    loadPeerFromStorage: (state, action) => ({
+    initPeers: (state, action) => ({
       ...state,
       multiPeer: {
         ...state.multiPeer,
