@@ -9,6 +9,28 @@ const initialState = {
 
 const reducerMap = {
   common: {
+    updateOwnStatus: (state, action) => {
+      switch (action.payload) {
+      case 'RELEASE':
+      case 'START_RELEASE':
+        return { ...state, multiPeer: { ...state.multiPeer, isReleasing: true } }
+      case 'STOP_RELEASE':
+        return { ...state, multiPeer: { ...state.multiPeer, isReleasing: false } }
+      case 'ADVERTISE':
+      case 'START_ADVERTISE':
+        return { ...state, multiPeer: { ...state.multiPeer, isAdvertising: true } }
+      case 'HIDE':
+      case 'STOP_ADVERTISE':
+        return { ...state, multiPeer: { ...state.multiPeer, isAdvertising: false } }
+      case 'BROWSE':
+      case 'START_BROWSE':
+        return { ...state, multiPeer: { ...state.multiPeer, isBrowsing: true } }
+      case 'STOP_BROWSE':
+        return { ...state, multiPeer: { ...state.multiPeer, isBrowsing: false } }
+      default:
+        return state
+      }
+    },
     updatePeerInfo: (state, action) => ({
       ...state,
       multiPeer: {
@@ -119,8 +141,16 @@ const reducerMap = {
       }
       const newPeersStatus = Object.assign({}, state.multiPeer.peersStatus)
       newPeersStatus[connectedEntry[0]].connected = true
+      const newUserIds = state.currCourse.userIds
+      if (!newUserIds.includes(connectedEntry[0])) {
+        newUserIds.push(connectedEntry[0])
+      }
       return {
         ...state,
+        currCourse: {
+          ...state.currCourse,
+          userIds: newUserIds,
+        },
         multiPeer: {
           ...state.multiPeer,
           peersStatus: newPeersStatus,

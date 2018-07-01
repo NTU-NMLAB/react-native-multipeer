@@ -1,7 +1,7 @@
 export default class PeerInfo {
-  constructor({ userId, userName, isTeacher }) {
+  constructor({ userId, username, isTeacher }) {
     this.userId = userId
-    this.userName = userName
+    this.username = username
     this.isTeacher = isTeacher
   }
 }
