@@ -3,7 +3,7 @@ import MultiPeerActions from '../../../actions/multiPeer.action'
 import { store } from '../../../../App'
 
 export default () => {
-  // const selfName = `User-${Math.round(1e6 * Math.random())}`
+  // const userId = `User-${Math.round(1e6 * Math.random())}`
 
   MultipeerConnection.registerListeners([
     {

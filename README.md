@@ -27,7 +27,7 @@ Following redux pattern, there is a state object recording all the operational s
 
 ```javascript
 const multipeerState = {
-  selfName: 'User-default',   // String, name of the device itself
+  userId: 'User-default',   // String, name of the device itself
   peers: {                    // An object containing (id: peer) pairs
     'xxxxxxxxxx': {             // Instance of Peer class
       id: 'xxxxxxxxxx',           // id of the peer; given by the underlying MultipeerConnectivity Protocol
@@ -45,7 +45,7 @@ const multipeerState = {
 ## Redux Action Creator Reference
 To update the state above and further refresh UI, all you need is to **`dispatch`** actions via following action-creators, which are defined in *`action/MultiPeer.action.js`*.
 
-#### `init(selfName)`
+#### `init(userId)`
 Initialize the underlying MultipeerConnectivity agent. This will be called programmatically when the app starts. (see `classes/MultipeerConnectionInit.js`)
 
 #### `browse()`
@@ -55,13 +55,13 @@ Browse for nearby peers that are advertising. When peers are found, they will be
 The cancellation of `browse()`.
 
 #### `advertise(info)`
-Allow discovery of yourself as a peer in the neighborhood. `info` is an object containing data which will be passed to other peers when they find you; it should at least contain `'name'` property, which is your `selfName`. When you are advertising, you will be found by nearby devices that have already called `browse()` action creator. If they find you and send an invitation to you, they will be inserted into `peers` in your `state` object, with an `invitationId`.
+Allow discovery of yourself as a peer in the neighborhood. `info` is an object containing data which will be passed to other peers when they find you; it should at least contain `'name'` property, which is your `userId`. When you are advertising, you will be found by nearby devices that have already called `browse()` action creator. If they find you and send an invitation to you, they will be inserted into `peers` in your `state` object, with an `invitationId`.
 
 #### `hide()`
 The cancellation of `advertise()`. Deny discovery of yourself as a peer. If you call this, all the peers that have ever `invite` you will be lost from `peers` in your `state`, no matter you two are connected or not.
 
 #### `invite(peerId, myInfo, callback)`
-Invite a peer into your session. You can only call this when you find someone via `browse` and you two are not connected yet. `myInfo` should at least contain `'name'` property, which is your `selfName`. `callback` will be executed after the invitation is sent.
+Invite a peer into your session. You can only call this when you find someone via `browse` and you two are not connected yet. `myInfo` should at least contain `'name'` property, which is your `userId`. `callback` will be executed after the invitation is sent.
 
 #### `responseInvite(sender, accept, callback)`
 Response an invitation from `sender`, which should be the sender's `name`. You can only call this when the sender's `invitationId` in your `state` is not empty, i.e., the sender has sent an invitation to you. `accept` is a boolean. If `accept === true`, You two will become connected. `callback` will be executed after the response is sent.

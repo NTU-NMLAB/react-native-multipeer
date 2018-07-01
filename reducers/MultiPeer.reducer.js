@@ -2,7 +2,7 @@ import { PeerStatus } from '../classes/Peer.class'
 import appConstants from '../constants/App.constant'
 
 const initialState = {
-  selfName: '',
+  userId: '',
   peers: {},
   courses: {}, // peer ids that have endered a course: peerId in state.multiPeer.courses['courseId']
   isBrowsing: false,
@@ -21,11 +21,11 @@ const reducerMap = {
     }),
   },
   backend: {
-    setSelfName: (state, action) => ({
+    setUserId: (state, action) => ({
       ...state,
       multiPeer: {
         ...state.multiPeer,
-        selfName: action.payload.selfName,
+        userId: action.payload.userId,
       },
     }),
     initPeers: (state, action) => ({
@@ -54,7 +54,7 @@ const reducerMap = {
       ...state,
       multiPeer: {
         ...state.multiPeer,
-        selfName: state.multiPeer.selfName,
+        userId: state.multiPeer.userId,
       },
     }),
     advertise: state => ({
