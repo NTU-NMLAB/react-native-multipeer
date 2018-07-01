@@ -1,6 +1,6 @@
 export default class Peer {
-  constructor(id, info, connected = false, invited = false, invitationId = '', online = false) {
-    this.id = id
+  constructor(info, currPeerId = '', connected = false, invited = false, invitationId = '', online = false) {
+    this.userId = info.userId
     this.info = {
       isTeacher: 'false',
       username: '', // name of user represented by this peer
@@ -8,6 +8,7 @@ export default class Peer {
       releasing: false, // teacher releasing
       ...info,
     }
+    this.currPeerId = currPeerId
     this.connected = connected
     this.invited = invited
     this.invitationId = invitationId

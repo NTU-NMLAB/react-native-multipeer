@@ -1,22 +1,32 @@
-import { PeerStatus } from '../classes/Peer.class'
-import appConstants from '../constants/App.constant'
-
 const initialState = {
   userId: '',
-  peers: {},
-  courses: {}, // peer ids that have endered a course: peerId in state.multiPeer.courses['courseId']
+  peersInfo: {},
+  peersStatus: {},
   isBrowsing: false,
   isAdvertising: false,
-  status: PeerStatus.IDLE, // idle, releasing, viewing, searching
+  isReleasing: false,
 }
 
 const reducerMap = {
   common: {
-    setStatus: (state, action) => ({
+    updatePeerInfo: (state, action) => ({
       ...state,
       multiPeer: {
         ...state.multiPeer,
-        status: action.payload,
+        peersInfo: {
+          ...state.peersInfo,
+          [action.payload.userId]: action.payload,
+        },
+      },
+    }),
+    updatePeerStatus: (state, action) => ({
+      ...state,
+      multiPeer: {
+        ...state.multiPeer,
+        peersStatus: {
+          ...state.peersStatus,
+          [action.payload.userId]: action.payload.peerStatus,
+        },
       },
     }),
   },
@@ -25,15 +35,14 @@ const reducerMap = {
       ...state,
       multiPeer: {
         ...state.multiPeer,
-        userId: action.payload.userId,
+        userId: action.payload,
       },
     }),
-    initPeers: (state, action) => ({
+    initPeersInfo: (state, action) => ({
       ...state,
       multiPeer: {
         ...state.multiPeer,
-        peers: action.payload.peers,
-        courses: action.payload.courses,
+        peersInfo: action.payload,
       },
     }),
     browse: state => ({
@@ -54,7 +63,7 @@ const reducerMap = {
       ...state,
       multiPeer: {
         ...state.multiPeer,
-        userId: state.multiPeer.userId,
+        peersStatus: {},
       },
     }),
     advertise: state => ({
@@ -72,101 +81,63 @@ const reducerMap = {
       },
     }),
     invite: (state, action) => {
-      if (!(action.payload.peerId in state.multiPeer.peers) ||
-          state.multiPeer.peers[action.payload.peerId].connected) {
+      const invitedEntry = Object.entries(state.multiPeer.peersStatus).find(e => e[1].currPeerId === action.payload.peerId)
+      if (invitedEntry === undefined || invitedEntry[1].connected) {
         return state
       }
-      const peer = state.multiPeer.peers[action.payload.peerId]
-      peer.invited = true
+      invitedEntry[1].invited = true
+      const newPeerStatus = Object.assign({}, invitedEntry[1])
       return {
         ...state,
         multiPeer: {
           ...state.multiPeer,
-          peers: {
-            ...state.multiPeer.peers,
-            [action.payload.peerId]: peer,
+          peersStatus: {
+            ...state.multiPeer.peersStatus,
+            [invitedEntry[0]]: newPeerStatus,
           },
         },
       }
     },
-    onPeerFoundSet: (state, action) => ({
-      ...state,
-      multiPeer: {
-        ...state.multiPeer,
-        peers: action.payload.peers,
-        courses: action.payload.courses,
-      },
-    }),
-    onPeerLostSet: (state, action) => {
-      if (action.payload.peer.info !== appConstants.SERVICE_TYPE
-        || !(action.payload.peer.id in state.multiPeer.peers)) {
+    onPeerLost: (state, action) => {
+      const lostEntry = Object.entries(state.multiPeer.peersStatus).find(e => e[1].currPeerId === action.payload)
+      if (lostEntry === undefined) {
         return state
       }
-      const peers = Object.assign({}, state.multiPeer.peers)
-      peers[action.payload.peer.id].online = false
+      const { [lostEntry[0]]: lost, ...rest } = state.multiPeer.peersStatus
       return {
         ...state,
         multiPeer: {
           ...state.multiPeer,
-          peers,
+          peersStatus: rest,
         },
       }
     },
     onPeerConnected: (state, action) => {
-      let peer = Object.assign({}, action.payload.peer)
-      if (peer.id in state.multiPeer.peers) {
-        peer = state.multiPeer.peers[peer.id]
-        peer.connected = true
-        peer.online = true
+      const connectedEntry = Object.entries(state.multiPeer.peersStatus).find(e => e[1].currPeerId === action.payload)
+      if (connectedEntry === undefined) {
+        return state
       }
+      const newPeersStatus = Object.assign({}, state.multiPeer.peersStatus)
+      newPeersStatus[connectedEntry[0]].connected = true
       return {
         ...state,
         multiPeer: {
           ...state.multiPeer,
-          peers: {
-            ...state.multiPeer.peers,
-            [peer.id]: peer,
-          },
+          peersStatus: newPeersStatus,
         },
       }
     },
     onPeerDisconnected: (state, action) => {
-      if (!(action.payload.peerId in state.multiPeer.peers)) {
+      const disconnEntry = Object.entries(state.multiPeer.peersStatus).find(e => e[1].currPeerId === action.payload)
+      if (disconnEntry === undefined) {
         return state
       }
-      const peers = Object.assign({}, state.multiPeer.peers)
-      peers[action.payload.peerId].online = false
-      peers[action.payload.peerId].connected = false
+      const { [disconnEntry[0]]: disconn, ...rest } = state.multiPeer.peersStatus
       return {
         ...state,
         multiPeer: {
           ...state.multiPeer,
-          peers,
-        },
-      }
-    },
-    onInviteReceivedSet: (state, action) => ({
-      ...state,
-      multiPeer: {
-        ...state.multiPeer,
-        peers: action.payload.peers,
-      },
-    }),
-    onInfoUpdate: (state, action) => {
-      if (action.payload.info.service !== appConstants.SERVICE_TYPE
-        || !(action.payload.peerId in state.multiPeer.peers)) {
-        return state
-      }
-      const peer = state.multiPeer.peers[action.payload.peerId]
-      peer.name = action.payload.info.name
-      return {
-        ...state,
-        multiPeer: {
-          ...state.multiPeer,
-          peers: {
-            ...state.multiPeer.peers,
-            [action.payload.peerId]: peer,
-          },
+          peersStatus: rest,
         },
       }
     },
