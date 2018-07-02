@@ -36,7 +36,7 @@ const reducerMap = {
       multiPeer: {
         ...state.multiPeer,
         peersInfo: {
-          ...state.peersInfo,
+          ...state.multiPeer.peersInfo,
           [action.payload.userId]: action.payload,
         },
       },
@@ -46,7 +46,7 @@ const reducerMap = {
       multiPeer: {
         ...state.multiPeer,
         peersStatus: {
-          ...state.peersStatus,
+          ...state.multiPeer.peersStatus,
           [action.payload.userId]: action.payload.peerStatus,
         },
       },
