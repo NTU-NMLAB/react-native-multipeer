@@ -67,20 +67,20 @@ const reducerMap = {
         peersInfo: action.payload,
       },
     }),
-    browse: state => ({
-      ...state,
-      multiPeer: {
-        ...state.multiPeer,
-        isBrowsing: true,
-      },
-    }),
-    stopBrowse: state => ({
-      ...state,
-      multiPeer: {
-        ...state.multiPeer,
-        isBrowsing: false,
-      },
-    }),
+    // browse: state => ({
+    //   ...state,
+    //   multiPeer: {
+    //     ...state.multiPeer,
+    //     isBrowsing: true,
+    //   },
+    // }),
+    // stopBrowse: state => ({
+    //   ...state,
+    //   multiPeer: {
+    //     ...state.multiPeer,
+    //     isBrowsing: false,
+    //   },
+    // }),
     disconnect: state => ({
       ...state,
       multiPeer: {
@@ -88,26 +88,27 @@ const reducerMap = {
         peersStatus: {},
       },
     }),
-    advertise: state => ({
-      ...state,
-      multiPeer: {
-        ...state.multiPeer,
-        isAdvertising: true,
-      },
-    }),
-    hide: state => ({
-      ...state,
-      multiPeer: {
-        ...state.multiPeer,
-        isAdvertising: false,
-      },
-    }),
+    // advertise: state => ({
+    //   ...state,
+    //   multiPeer: {
+    //     ...state.multiPeer,
+    //     isAdvertising: true,
+    //   },
+    // }),
+    // hide: state => ({
+    //   ...state,
+    //   multiPeer: {
+    //     ...state.multiPeer,
+    //     isAdvertising: false,
+    //   },
+    // }),
     invite: (state, action) => {
-      const invitedEntry = Object.entries(state.multiPeer.peersStatus).find(e => e[1].currPeerId === action.payload.peerId)
+      const { peerId, inviting } = action.payload
+      const invitedEntry = Object.entries(state.multiPeer.peersStatus).find(e => e[1].currPeerId === peerId)
       if (invitedEntry === undefined || invitedEntry[1].connected) {
         return state
       }
-      invitedEntry[1].invited = true
+      invitedEntry[1].invited = inviting
       const newPeerStatus = Object.assign({}, invitedEntry[1])
       return {
         ...state,
